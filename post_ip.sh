@@ -54,7 +54,9 @@ echo "DDNS_KEY=\"$DDNS_KEY\"" >> "$SECRETS_FILE"
 
 echo "Saved URL and key in $SECRETS_FILE"
 
-chmod 777 post_ip.sh
+sudo chown root "$SCRIPT_DIR/post_ip.sh"
+sudo chmod 544 "$SCRIPT_DIR/post_ip.sh"
+
 ln -s "$SCRIPT_DIR/post_ip.sh" "$NM_DISPATCHER_DIR/post_ip"
 
 echo "Created symlink in $NM_DISPATCHER_DIR/post_ip"
