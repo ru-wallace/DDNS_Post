@@ -3,7 +3,7 @@
 SCRIPT_DIR="$(dirname "$(readlink -f "$0")")"
 
 SECRETS_FILE="$SCRIPT_DIR/.secret"
-
+echo "Secrets File: $SECRETS_FILE"
 # Exit if .env file exists
 if [ -f "$SECRETS_FILE" ]; then
 
@@ -12,8 +12,10 @@ if [ -f "$SECRETS_FILE" ]; then
         echo "action: ${2}"
         if [ $# -eq 2 ] && [ "$2" = "up" ]; then
             echo "Running the script with 'up' argument."
+        elif [ $# -eq 2 ] && [ "$2" = "hostname" ]; then
+            echo "Running the script with 'hostname' argument."
         else
-            echo "Usage: $0 [ip_address up] [access_key]"
+            echo "Usage: $0 [ip_address up]"
             exit 1
         fi
     fi
@@ -21,13 +23,14 @@ if [ -f "$SECRETS_FILE" ]; then
 
     export $(grep -v '^#' "$SECRETS_FILE" | xargs)
     ip_address="$(hostname -I)"
-
+    echo "URL: $DDNS_URL"
     # Create a JSON payload with the IP address and access key
     data="{\"ip_address\":\"$ip_address\",\"key\":\"$DDNS_KEY\",\"device\":\"$DDNS_DEVICE\"}"
-
+    echo "Attempting to post hostname: $ip_address"
     # Send the POST request using curl
     curl -X POST -H "Content-Type: application/json" -d "$data" "$DDNS_URL"
-    exit 0
+	
+    exit $?
 fi
 
 
@@ -54,7 +57,7 @@ echo "DDNS_KEY=\"$DDNS_KEY\"" >> "$SECRETS_FILE"
 
 echo "Saved URL and key in $SECRETS_FILE"
 
-sudo chown root "$SCRIPT_DIR/post_ip.sh"
+sudo chown root:root "$SCRIPT_DIR/post_ip.sh"
 sudo chmod 544 "$SCRIPT_DIR/post_ip.sh"
 
 ln -s "$SCRIPT_DIR/post_ip.sh" "$NM_DISPATCHER_DIR/post_ip"
